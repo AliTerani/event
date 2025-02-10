@@ -7,31 +7,15 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 20px;
-        }
-        #reader {
-            width: 300px;
-            margin: auto;
-        }
-        #result {
-            font-size: 18px;
-            margin-top: 20px;
-        }
-        #winner-box {
-            font-size: 24px;
-            font-weight: bold;
-            color: green;
-            margin-top: 20px;
-        }
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        #reader { width: 300px; margin: auto; }
+        #result, #winner-box { font-size: 18px; margin-top: 20px; font-weight: bold; }
+        #winner-box { color: green; font-size: 24px; }
     </style>
 </head>
 <body>
 
     <h1>QR Code Scanner</h1>
-    <input type="file" id="upload" accept=".xlsx">
     <button onclick="startScanner()">Scan QR Code</button>
     <div id="reader"></div>
     <div id="result"></div>
@@ -41,26 +25,27 @@
 
     <script>
         let data = [];
-        function loadExcel(event) {
-            let file = event.target.files[0];
-            let reader = new FileReader();
-            reader.readAsBinaryString(file);
-            reader.onload = function(e) {
-                let workbook = XLSX.read(e.target.result, { type: 'binary' });
-                let sheetName = workbook.SheetNames[0];
-                let sheet = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-                data = sheet.map(row => ({
-                    Name: row.Name,
-                    Mobile: String(row.Mobile),
-                    Agency: row.Agency,
-                    Guests: row.Guests,
-                    Show: "No"
-                }));
-                alert("Excel Data Loaded!");
-            };
+
+        // Load Excel automatically
+        function loadExcel() {
+            fetch('Ali.xlsx')
+                .then(response => response.arrayBuffer())
+                .then(buffer => {
+                    let workbook = XLSX.read(buffer, { type: 'array' });
+                    let sheet = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                    data = sheet.map(row => ({
+                        Name: row.Name,
+                        Mobile: String(row.Mobile),
+                        Agency: row.Agency,
+                        Guests: row.Guests,
+                        Show: "No"
+                    }));
+                    console.log("Excel Loaded:", data);
+                })
+                .catch(error => console.error("Error loading Excel:", error));
         }
 
-        document.getElementById('upload').addEventListener('change', loadExcel);
+        document.addEventListener("DOMContentLoaded", loadExcel);
 
         function startScanner() {
             let scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
@@ -88,6 +73,7 @@
                 alert("No attendees to select from!");
                 return;
             }
+
             let index = 0;
             let interval = setInterval(() => {
                 document.getElementById("winner-box").innerText = attendees[index].Name;
