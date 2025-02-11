@@ -68,24 +68,24 @@
         }
 
         function withdrawWinner() {
-            let attendees = data.filter(person => person.Show === "Yes");
-            if (attendees.length === 0) {
+            if (data.length === 0) {
                 alert("No attendees to select from!");
                 return;
             }
-
+        
             let index = 0;
             let interval = setInterval(() => {
-                document.getElementById("winner-box").innerText = attendees[index].Name;
-                index = (index + 1) % attendees.length;
+                document.getElementById("winner-box").innerText = data[index].Name;
+                index = (index + 1) % data.length;
             }, 100);
-
+        
             setTimeout(() => {
                 clearInterval(interval);
-                let winner = attendees[Math.floor(Math.random() * attendees.length)];
+                let winner = data[Math.floor(Math.random() * data.length)];
                 document.getElementById("winner-box").innerText = `Winner: ${winner.Name}`;
             }, 3000);
         }
+
     </script>
 
 </body>
